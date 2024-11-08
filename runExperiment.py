@@ -81,8 +81,6 @@ def runExperiment(dataset, featureExtract, algorithm, seed):
             X = X.toarray()
             print(X.shape)
 
-
-    exit() ### <-- remover
     # -------------------------------
     # Creating labels (textbloob)
     # -------------------------------
