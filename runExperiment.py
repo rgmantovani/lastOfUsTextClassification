@@ -28,7 +28,7 @@ from sklearn.tree import DecisionTreeClassifier
 # -------------------------------
 
 from preprocessing import preprocess_text
-from featureExtraction import get_TFIDF_features
+from featureExtraction import get_TFIDF_features, get_BOW_features, get_WESG_features, get_WECBOW_features
 
 # -------------------------------
 # Run Experiment
@@ -62,12 +62,27 @@ def runExperiment(dataset, featureExtract, algorithm, seed):
     # Feature Extraction (TFIDF)
     # -------------------------------
 
-    X = None 
-    if(featureExtract == "TFIDF"):
-        X = get_TFIDF_features(data = df2)
-        X = X.toarray()
-        print(X.shape)
-   
+    X = None
+    match featureExtract:
+        case "TFIDF":
+            X = get_TFIDF_features(data = df2, dataset_name = dataset)
+            X = X.toarray()
+            print(X.shape)
+        case "BOW":
+            X = get_BOW_features(data = df2, dataset_name = dataset)
+            X = X.toarray()
+            print(X.shape)
+        case "WESG":
+            X = get_WESG_features(data = df2, dataset_name = dataset)
+            X = X.toarray()
+            print(X.shape)
+        case "WECBOW":
+            X = get_WECBOW_features(data = df2, dataset_name = dataset)
+            X = X.toarray()
+            print(X.shape)
+
+
+    exit() ### <-- remover
     # -------------------------------
     # Creating labels (textbloob)
     # -------------------------------
@@ -80,23 +95,24 @@ def runExperiment(dataset, featureExtract, algorithm, seed):
     # -------------------------------
     # Learning process
     # -------------------------------
-
-    # Stratified 10-fold CV
-    skf = StratifiedKFold(n_splits=10, random_state=seed, shuffle=True)
   
     classifier = None
-    if(algorithm == "KNN"):
-        classifier = KNeighborsClassifier()
-    elif(algorithm == "DT"):
-        classifier = DecisionTreeClassifier(random_state=seed)
-    elif(algorithm == "RF"):
-        classifier = RandomForestClassifier(random_state=seed)
-    elif(algorithm == "MNB"):
-        classifier = MultinomialNB()
-    else:
-        classifier = GaussianNB()
+    match algorithm:
+        case "KNN":
+            classifier = KNeighborsClassifier()
+        case "DT":
+            classifier = DecisionTreeClassifier(random_state=seed)
+        case "RF":
+            classifier = RandomForestClassifier(random_state=seed)
+        case "MNB":
+            classifier = MultinomialNB()
+        case "GNB":
+            classifier = GaussianNB()
  
     print(" - Training: " + algorithm)
+    
+    # Stratified 10-fold CV
+    skf = StratifiedKFold(n_splits=10, random_state=seed, shuffle=True)
 
     scores = cross_val_score(classifier, X, ybinary, cv=skf, scoring='balanced_accuracy')
     print("Results: ")

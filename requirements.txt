@@ -1,0 +1,8 @@
+nltk
+pandas
+textblob
+scikit-learn
+numpy
+matplotlib
+seaborn
+gensim
