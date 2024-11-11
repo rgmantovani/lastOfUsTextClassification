@@ -22,6 +22,8 @@ from sklearn.ensemble import RandomForestClassifier
 from sklearn.naive_bayes import GaussianNB, MultinomialNB
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.tree import DecisionTreeClassifier
+from sklearn.svm import SVC
+from xgboost import XGBClassifier
 
 # -------------------------------
 # Customized functions
@@ -34,7 +36,7 @@ from featureExtraction import get_TFIDF_features, get_BOW_features, get_WESG_fea
 # Run Experiment
 # -------------------------------
 
-def runExperiment(dataset, featureExtract, algorithm, seed):
+def runExperiment(dataset, featureExtract, algorithm, seed, class_mode="textblob"):
 
     print(" - Reading dataset")
     data = pd.read_csv("data/" + dataset + ".csv")
@@ -45,10 +47,12 @@ def runExperiment(dataset, featureExtract, algorithm, seed):
     # Calculating Text Polabority (TextBlob)
     # -------------------------------
 
-    print(" - Calculating Text Polarity")
     reviews = df[['id', 'review']]
     dfReviews = reviews.copy()
-    dfReviews['polarity'] = dfReviews['review'].apply(lambda tweet: TextBlob(tweet).polarity)
+
+    if class_mode == "textblob":
+        print(" - Calculating Text Polarity")
+        dfReviews['polarity'] = dfReviews['review'].apply(lambda tweet: TextBlob(tweet).polarity)
 
     # ---------------
     # Preprocessing
@@ -85,10 +89,15 @@ def runExperiment(dataset, featureExtract, algorithm, seed):
     # Creating labels (textbloob)
     # -------------------------------
     
-    print(" - Creating Labels")
-    y = df2['polarity']
-    ybinary = (y > 0 ) * 1
-    ybinary = ybinary.ravel()
+    match class_mode:
+        case "textblob": 
+            print(" - Creating Labels (textblob)")
+            y = df2['polarity']
+            ybinary = (y > 0 ) * 1
+        case "scores":
+            print(" - Creating Labels (scores)")
+            y = df['score'].value_counts().sort_index(ascending=False)
+            ybinary = (y.index >= 5).astype(int)
 
     # -------------------------------
     # Learning process
@@ -106,6 +115,10 @@ def runExperiment(dataset, featureExtract, algorithm, seed):
             classifier = MultinomialNB()
         case "GNB":
             classifier = GaussianNB()
+        case "SVM":
+            classifier = SVC()
+        case "GXB":
+            classifier = XGBClassifier()
  
     print(" - Training: " + algorithm)
     

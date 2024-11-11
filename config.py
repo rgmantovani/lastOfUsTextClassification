@@ -5,7 +5,7 @@ VALID_DATASETS = ["user_reviews_g1", "user_reviews_g2"]
 
 VALID_FEATURES = ["TFIDF", "BOW", "WESG", "WECBOW"]
 
-VALID_ALGORITHMS = ["KNN", "DT", "RF", "MNB", "GNB"]
+VALID_ALGORITHMS = ["KNN", "DT", "RF", "MNB", "GNB", "SVM", "XGB"]
 
 # -----------------------------------------------------------------------------------
 # -----------------------------------------------------------------------------------
