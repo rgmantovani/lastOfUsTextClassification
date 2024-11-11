@@ -22,19 +22,21 @@ from sklearn.ensemble import RandomForestClassifier
 from sklearn.naive_bayes import GaussianNB, MultinomialNB
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.tree import DecisionTreeClassifier
+from sklearn.svm import SVC
+from xgboost import XGBClassifier
 
 # -------------------------------
 # Customized functions
 # -------------------------------
 
 from preprocessing import preprocess_text
-from featureExtraction import get_TFIDF_features
+from featureExtraction import get_TFIDF_features, get_BOW_features, get_WESG_features, get_WECBOW_features
 
 # -------------------------------
 # Run Experiment
 # -------------------------------
 
-def runExperiment(dataset, featureExtract, algorithm, seed):
+def runExperiment(dataset, featureExtract, algorithm, seed, class_mode="textblob"):
 
     print(" - Reading dataset")
     data = pd.read_csv("data/" + dataset + ".csv")
@@ -45,10 +47,12 @@ def runExperiment(dataset, featureExtract, algorithm, seed):
     # Calculating Text Polabority (TextBlob)
     # -------------------------------
 
-    print(" - Calculating Text Polarity")
     reviews = df[['id', 'review']]
     dfReviews = reviews.copy()
-    dfReviews['polarity'] = dfReviews['review'].apply(lambda tweet: TextBlob(tweet).polarity)
+
+    if class_mode == "textblob":
+        print(" - Calculating Text Polarity")
+        dfReviews['polarity'] = dfReviews['review'].apply(lambda tweet: TextBlob(tweet).polarity)
 
     # ---------------
     # Preprocessing
@@ -62,41 +66,64 @@ def runExperiment(dataset, featureExtract, algorithm, seed):
     # Feature Extraction (TFIDF)
     # -------------------------------
 
-    X = None 
-    if(featureExtract == "TFIDF"):
-        X = get_TFIDF_features(data = df2)
-        X = X.toarray()
-        print(X.shape)
-   
+    X = None
+    match featureExtract:
+        case "TFIDF":
+            X = get_TFIDF_features(data = df2, dataset_name = dataset)
+            X = X.toarray()
+            print(X.shape)
+        case "BOW":
+            X = get_BOW_features(data = df2, dataset_name = dataset)
+            X = X.toarray()
+            print(X.shape)
+        case "WESG":
+            X = get_WESG_features(data = df2, dataset_name = dataset)
+            X = X.toarray()
+            print(X.shape)
+        case "WECBOW":
+            X = get_WECBOW_features(data = df2, dataset_name = dataset)
+            X = X.toarray()
+            print(X.shape)
+
     # -------------------------------
     # Creating labels (textbloob)
     # -------------------------------
     
-    print(" - Creating Labels")
-    y = df2['polarity']
-    ybinary = (y > 0 ) * 1
-    ybinary = ybinary.ravel()
+    match class_mode:
+        case "textblob": 
+            print(" - Creating Labels (textblob)")
+            y = df2['polarity']
+            ybinary = (y > 0 ) * 1
+        case "scores":
+            print(" - Creating Labels (scores)")
+            y = df['score'].value_counts().sort_index(ascending=False)
+            ybinary = (y.index >= 5).astype(int)
 
     # -------------------------------
     # Learning process
     # -------------------------------
-
-    # Stratified 10-fold CV
-    skf = StratifiedKFold(n_splits=10, random_state=seed, shuffle=True)
   
     classifier = None
-    if(algorithm == "KNN"):
-        classifier = KNeighborsClassifier()
-    elif(algorithm == "DT"):
-        classifier = DecisionTreeClassifier(random_state=seed)
-    elif(algorithm == "RF"):
-        classifier = RandomForestClassifier(random_state=seed)
-    elif(algorithm == "MNB"):
-        classifier = MultinomialNB()
-    else:
-        classifier = GaussianNB()
+    match algorithm:
+        case "KNN":
+            classifier = KNeighborsClassifier()
+        case "DT":
+            classifier = DecisionTreeClassifier(random_state=seed)
+        case "RF":
+            classifier = RandomForestClassifier(random_state=seed)
+        case "MNB":
+            classifier = MultinomialNB()
+        case "GNB":
+            classifier = GaussianNB()
+        case "SVM":
+            classifier = SVC()
+        case "GXB":
+            classifier = XGBClassifier()
  
     print(" - Training: " + algorithm)
+    
+    # Stratified 10-fold CV
+    skf = StratifiedKFold(n_splits=10, random_state=seed, shuffle=True)
 
     scores = cross_val_score(classifier, X, ybinary, cv=skf, scoring='balanced_accuracy')
     print("Results: ")
