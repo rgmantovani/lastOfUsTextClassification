@@ -1,13 +1,29 @@
+# ----------------------------------
+# Creating virtualenv:
+# ----------------------------------
+
+#   >> virtualenv last
+#   >> source last/bin/activate
+#   >> pip install -r requirements.txt
+
+# ----------------------------------
+# ----------------------------------
+
 # How to run:
-# 
 # main.py [dataset] [featureExtract] [algorithm] [seed]
+
+# ----------------------------------
+# ----------------------------------
 
 import sys
 import os
-import config
+import src.config as config
 import pickle as pickle
 
-from runExperiment import runExperiment
+from src.runExperiment import runExperiment
+
+# ----------------------------------
+# ----------------------------------
 
 if __name__ == "__main__":
     
@@ -44,6 +60,9 @@ if __name__ == "__main__":
     # algorithm = "KNN"
     # featureExtract = "TFIDF"
     # seed = 0
+   
+    # ----------------
+    # ----------------
         
     dataset = sys.argv[1]
     featureExtract = sys.argv[2]
@@ -62,7 +81,7 @@ if __name__ == "__main__":
     results = runExperiment(dataset = dataset, featureExtract = featureExtract, 
                             algorithm = algorithm, seed = seed)
     
-    #create output dir if not exists
+    # create output dir if not exists
     os.makedirs("output", exist_ok=True)
 
     # save results
@@ -71,3 +90,8 @@ if __name__ == "__main__":
     pickle.dump(results, file = open(output_file, "wb"))
    
     print(" - Finished :)")
+    
+# ----------------------------------
+# ----------------------------------
+
+    
