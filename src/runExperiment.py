@@ -23,14 +23,14 @@ from sklearn.naive_bayes import GaussianNB, MultinomialNB
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.tree import DecisionTreeClassifier
 from sklearn.svm import SVC
-from xgboost import XGBClassifier
+# from xgboost import XGBClassifier
 
 # -------------------------------
 # Customized functions
 # -------------------------------
 
-from preprocessing import preprocess_text
-from featureExtraction import get_TFIDF_features, get_BOW_features, get_WESG_features, get_WECBOW_features
+from src.preprocessing import preprocess_text
+from src.featureExtraction import get_TFIDF_features, get_BOW_features, get_WESG_features, get_WECBOW_features
 
 # -------------------------------
 # Run Experiment
@@ -39,7 +39,9 @@ from featureExtraction import get_TFIDF_features, get_BOW_features, get_WESG_fea
 def runExperiment(dataset, featureExtract, algorithm, seed, class_mode="textblob"):
 
     print(" - Reading dataset")
-    data = pd.read_csv("data/" + dataset + ".csv")
+    datafile = "data/" + dataset + ".csv"
+    print(datafile)
+    data = pd.read_csv(datafile)
     df = data.loc[data['language'] == 'English']    
     print(df.head())
 
@@ -63,27 +65,21 @@ def runExperiment(dataset, featureExtract, algorithm, seed, class_mode="textblob
     df2['reviewText'] = df2['review'].apply(preprocess_text)
 
     # -------------------------------
-    # Feature Extraction (TFIDF)
+    # Feature Extraction
     # -------------------------------
 
     X = None
     match featureExtract:
         case "TFIDF":
             X = get_TFIDF_features(data = df2, dataset_name = dataset)
-            X = X.toarray()
-            print(X.shape)
         case "BOW":
             X = get_BOW_features(data = df2, dataset_name = dataset)
-            X = X.toarray()
-            print(X.shape)
         case "WESG":
             X = get_WESG_features(data = df2, dataset_name = dataset)
-            X = X.toarray()
-            print(X.shape)
         case "WECBOW":
             X = get_WECBOW_features(data = df2, dataset_name = dataset)
-            X = X.toarray()
-            print(X.shape)
+    X = X.toarray()
+    print(X.shape)
 
     # -------------------------------
     # Creating labels (textbloob)
@@ -117,8 +113,8 @@ def runExperiment(dataset, featureExtract, algorithm, seed, class_mode="textblob
             classifier = GaussianNB()
         case "SVM":
             classifier = SVC()
-        case "GXB":
-            classifier = XGBClassifier()
+        # case "GXB":
+            # classifier = XGBClassifier()
  
     print(" - Training: " + algorithm)
     

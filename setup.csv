@@ -1,4 +1,4 @@
-algoritmo,feature,dataset,seed
+algorithm,feature,dataset,seed
 KNN,TFIDF,user_reviews_g1,1
 KNN,TFIDF,user_reviews_g1,2
 KNN,TFIDF,user_reviews_g1,3

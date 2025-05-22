@@ -1,4 +1,12 @@
+# MAC OS Files
 .DS_Store
+
+# Python compiled files
 __pycache__/
 venv
+
+# virtual env folders
+last/
+
+# testing files
 testes.py
